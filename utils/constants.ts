@@ -76,8 +76,8 @@ export const NAV_ITEMS: NavSection[] = [
     section: 'MANAGEMENT',
     items: [
       { label: 'Attendance', icon: 'calendar-check', to: '/attendance', roles: [ROLE.ADMIN, ROLE.STAFF] },
-      { label: 'Grades',     icon: 'award',          to: '/grades',     roles: [ROLE.ADMIN, ROLE.STAFF] },
-      { label: 'Payments',   icon: 'credit-card',    to: '/payments',   roles: [ROLE.ADMIN, ROLE.STAFF] },
+      // { label: 'Grades',     icon: 'award',          to: '/grades',     roles: [ROLE.ADMIN, ROLE.STAFF] },
+      // { label: 'Payments',   icon: 'credit-card',    to: '/payments',   roles: [ROLE.ADMIN, ROLE.STAFF] },
       { label: 'Schedule',   icon: 'clock',          to: '/schedule',   roles: [ROLE.ADMIN, ROLE.STAFF] },
     ],
   },

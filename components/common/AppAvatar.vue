@@ -23,7 +23,7 @@
             :class="online ? 'bg-emerald-500' : 'bg-neutral-500'"
             style="border-color: var(--surface-card)"
             :style="{ width: dotSize, height: dotSize }"
-        />
+        ></span>/>
     </div>
 </template>
 

@@ -7,9 +7,9 @@
         <Transition name="modal-overlay">
             <div
                 v-if="sidebarOpen && isMobile && isMounted"
-                class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+                class="fixed inset-0 z-40 bg-black/60 lg:hidden"
                 @click="ui.setSidebarOpen(false)"
-            />
+            ></div>
         </Transition>
 
         <!-- Sidebar -->

@@ -18,9 +18,9 @@
                 <Transition name="fade">
                     <div v-if="!collapsed" class="truncate">
                         <h2
-                            class="text-sm text-[var(--text-primary)] dark:text-white leading-tight"
+                            class="text-sm mr-2 text-[var(--text-primary)] dark:text-white leading-tight"
                         >
-                            Student Management System
+                         Student Management System
                         </h2>
                     </div>
                 </Transition>
@@ -28,7 +28,7 @@
 
             <!-- Collapse toggle (desktop only) -->
             <button
-                class="hidden lg:flex w-7 h-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--sidebar-item-hover)] shrink-0"
+                class="lg:flex w-8 h-8 px-2 items-center justify-center rounded-lg transition-colors hover:bg-[var(--sidebar-item-hover)] shrink-0"
                 style="color: var(--sidebar-text)"
                 @click="toggleCollapse"
             >

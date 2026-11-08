@@ -55,7 +55,7 @@
 }
 
 .dark {
-    --surface-bg: #000000;
+    --surface-bg: #131215;
     --surface-card: #0a0a0a;
     --surface-border: rgba(255, 255, 255, 0.14);
     --surface-hover: rgba(255, 255, 255, 0.08);
@@ -207,7 +207,7 @@
     }
 
     .btn-secondary {
-        @apply btn border border-[var(--surface-border)] bg-[var(--surface-hover)] text-[var(--text-primary)] hover:border-primary-500/50 hover:text-primary-400;
+        @apply btn border border-[var(--surface-border)] rounded-lg bg-[var(--surface-hover)] text-[var(--text-primary)] hover:border-primary-500/50 hover:text-primary-400;
     }
 
     .btn-ghost {

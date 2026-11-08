@@ -1,6 +1,6 @@
 <template>
     <header
-        class="h-16 flex items-center gap-2 border-b px-4 md:px-6 shrink-0 relative z-30"
+        class="h-16 flex items-center gap-2 border-b px-1 sm:px-6 shrink-0 relative z-30"
     >
         <!-- Mobile Menu Toggle -->
         <button
@@ -24,7 +24,7 @@
 
         <!-- Breadcrumb -->
         <AppBreadcrumb class="hidden md:flex flex-1" />
-        <div class="flex-1 md:hidden" />
+        <div class="flex-1 md:hidden" ></div>
 
         <!-- Right Section -->
         <div class="flex items-center gap-2">
@@ -111,14 +111,14 @@
                     <span
                         v-if="unreadCount > 0"
                         class="absolute top-1 right-1 w-2 h-2 rounded-full bg-white"
-                    />
+                    ></span>
                 </button>
 
                 <!-- Notification Dropdown -->
                 <Transition name="dropdown">
                     <div
                         v-if="notifOpen"
-                        class="absolute right-0 top-full mt-2 w-80 rounded-lg shadow-md overflow-hidden"
+                        class="absolute right-0  top-full mt-2 w-80 rounded-lg shadow-md overflow-hidden"
                         style="
                             background: var(--surface-card);
                             border: 1px solid var(--surface-border);
@@ -241,7 +241,7 @@
             <!-- Profile Dropdown -->
             <div class="relative" ref="profileRef">
                 <button
-                    class="flex items-center gap-2 px-2 py-1.5 rounded-full transition-colors hover:bg-[var(--surface-hover)]"
+                    class="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-[var(--surface-hover)]"
                     @click="profileOpen = !profileOpen"
                 >
                     <img
@@ -252,7 +252,7 @@
                     />
                     <div
                         v-else
-                        class="w-10 h-10 rounded-full bg-[var(--primary)] text-[var(--text-inverse)] flex items-center justify-center text-lg font-bold"
+                        class="w-10 h-10 rounded-full bg-[var(--primary)] text-[var(--text-inverse)] flex items-center justify-center text-xs font-bold leading-none"
                     >
                         {{ initials }}
                     </div>
