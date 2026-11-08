@@ -1,5 +1,3 @@
-##  Features
-
 ###  Dashboard
 - Real-time stats cards (students, teachers, courses, revenue)
 - Revenue vs Expenses chart (Line)
