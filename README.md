@@ -37,17 +37,6 @@
 - Attendance records table with status filtering
 - Summary stat cards
 
-###  Grades
-- Grade distribution breakdown (A–F)
-- Grades table with score progress bars
-- Letter grade color coding
-- Semester and course filtering
-
-###  Payments & Finance
-- Finance KPI cards (total collected, pending, overdue)
-- Payment records table with status, type, and invoice number
-- Mark as paid action
-
 ###  Schedule / Timetable
 - Week view grid timetable
 - List view by day
@@ -120,8 +109,6 @@ GET    /api/teachers
 GET    /api/courses
 GET    /api/departments
 GET    /api/attendance
-GET    /api/grades
-GET    /api/payments
 ```
 
 To switch from mock data to live API, update the store actions — replace `await new Promise(r => setTimeout(r, 800))` calls with the real service calls already defined in `/services/`.
