@@ -76,9 +76,6 @@ const chartOptions = computed(() => ({
       },
     },
   },
-  
-  /*#00D47E*/
-  /*#025864*/
 
   scales: {
     x: {

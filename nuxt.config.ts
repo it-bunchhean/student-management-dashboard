@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Student Management System",
-      titleTemplate: "%s | EduAdmin Pro",
+      titleTemplate: "%s - SMS",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -71,3 +71,4 @@ export default defineNuxtConfig({
 
   components: [{ path: "~/components", pathPrefix: false }],
 });
+  

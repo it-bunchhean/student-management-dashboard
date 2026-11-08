@@ -191,12 +191,12 @@ export const mockActivities: Activity[] = [
 
 // ─── Dashboard Stats ───────────────────────────────────────────────────────
 export const mockDashboardStats: DashboardStats = {
-  totalStudents: 1750,
-  totalTeachers: 106,
-  activeCourses: 48,
-  totalRevenue: 284500,
-  attendanceRate: 87.4,
-  averageGpa: 3.24,
+  totalStudents: 0,
+  totalTeachers: 0,
+  activeCourses: 0,
+  totalRevenue: 0,
+  attendanceRate: 0,
+  averageGpa: 0,
   newStudentsThisMonth: 42,
   revenueGrowth: 12.5,
   studentsGrowth: 8.3,
@@ -209,7 +209,7 @@ export const mockRevenueData = {
   datasets: [
     {
       label: 'Revenue',
-      data: [42000, 38000, 45000, 51000, 48000, 55000, 49000, 60000, 72000, 68000, 75000, 89000],
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       backgroundColor: 'rgba(99,102,241,0.15)',
       borderColor: '#6366f1',
       borderWidth: 2,
