@@ -4,7 +4,7 @@
       <div
         v-if="modelValue"
         class="fixed inset-0 z-[8000] flex items-center justify-center p-4"
-        style="background: rgba(0,0,0,0.65); backdrop-filter: blur(6px)"
+        style="background: rgba(0,0,0,0.65); "
         @click.self="$emit('update:modelValue', false)"
       >
         <Transition name="modal">
@@ -78,7 +78,7 @@
             </div>
 
             <div class="flex items-center justify-between gap-3 px-6 py-4 shrink-0" style="border-top: 1px solid var(--surface-border)">
-              <button class="btn border border-slate-300 text-sm" @click="$emit('update:modelValue', false)">Cancel</button>
+              <button class="btn-ghost text-sm" @click="$emit('update:modelValue', false)">Cancel</button>
               <button class="btn-primary" :disabled="loading" @click="handleSubmit">
                 <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

@@ -34,7 +34,7 @@
         subtext="+ 0 this month"
       />
       <StatsCard
-        label="Total Teachers"
+        label="Total Users"
         :value="10"
         icon="user-check"
         iconColor="#34d399"

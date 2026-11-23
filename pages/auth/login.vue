@@ -104,48 +104,45 @@
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Sign In' })
 
-// Login disabled: redirect directly to dashboard
-await navigateTo('/dashboard')
-
 const authStore = useAuthStore()
 const toast = useToast()
+const route = useRoute()
 
 const showPassword = ref(false)
 const form = reactive({ email: '', password: '' })
 const errors = ref<Record<string, string>>({})
-const {user} = storeToRefs(authStore);
-
 const authLoading = computed(() => authStore.loading)
 const authError = computed(() => authStore.error)
 
-// Real signin commented out while login is disabled
-/*
-const handleLogin = async () =>  {
+const handleLogin = async () => {
   authStore.clearError();
 
-  try {
-    const response = await authStore.signin(form);
-    console.log(response)
-    if (response) {
-      toast.success("Logged in successfully.")
-      if (authStore.isAdmin || authStore.isStaff) {
-        await navigateTo("/dashboard")
-      } else if (authStore.userName.toLowerCase().includes("teacher")) {
-        await navigateTo("/teachers")
-      } else {
-        await navigateTo("/")
-      }
-    } else {
-      toast.error("Email or Password incorrect.")
-    }
-  } catch(e: any) {
-    console.log(e.message);
-  }
-}
-*/
+  errors.value = {}
+  if (!form.email.trim()) errors.value.email = 'Email is required.'
+  if (!form.password) errors.value.password = 'Password is required.'
+  if (Object.keys(errors.value).length > 0) return
 
-const handleLogin = async() => {
-    await navigateTo("/dashboard")
+  const signedIn = await authStore.signin({
+    email: form.email.trim(),
+    password: form.password,
+  })
+
+  if (!signedIn) {
+    toast.error(authStore.error || 'Email or password is incorrect.')
+    return
+  }
+
+  toast.success('Logged in successfully.')
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+  const destination = redirect.startsWith('/') && !redirect.startsWith('//')
+    ? redirect
+    : authStore.isAdmin || authStore.isStaff
+      ? '/dashboard'
+      : authStore.user?.role === 'ROLE_TEACHER'
+        ? '/teachers'
+        : '/'
+
+  await navigateTo(destination)
 }
 
 // Clear errors on input

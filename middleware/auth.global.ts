@@ -1,35 +1,23 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  // Auth and Login/Register checks disabled
-  /*
-  console.log("Auth middleware triggered for: ", to.fullPath)
-  const config = useRuntimeConfig()
-
-  if (import.meta.dev)  {
-      return
-  }
-
-  const auth = useAuthStore()
-
   const publicRoutes = [
     '/auth/login',
     '/auth/register',
     '/auth/forgot-password',
     '/403',
   ]
-  
+
   if (publicRoutes.includes(to.path)) {
-    console.log("Route is public, allowing access")
     return
   }
 
+  const auth = useAuthStore()
+
   if (!auth.isAuthenticated) {
-    console.log("User not authenticated, checking with backend...")
     await auth.checkAuth()
   }
 
   if (!auth.isAuthenticated) {
-    console.log("Authentication failed, redirecting to login")
-    return navigateTo('/auth/login')
+    return navigateTo({ path: '/auth/login', query: { redirect: to.fullPath } })
   }
 
   const requiredRoles = to.meta?.roles as string[] | undefined
@@ -37,12 +25,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (requiredRoles && requiredRoles.length > 0) {
     const userRole = auth.user?.role ?? ''
     const hasAccess = requiredRoles.includes(userRole)
-    console.log("Role check - Required:", requiredRoles, "User role:", userRole, "Has access:", hasAccess)
-
     if (!hasAccess) {
-      console.log("User lacks required role, redirecting to 403")
       return navigateTo('/403')
     }
   }
-  */
 })

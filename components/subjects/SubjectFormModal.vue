@@ -4,7 +4,7 @@
       <div
         v-if="modelValue"
         class="fixed inset-0 z-[8000] flex items-center justify-center p-4"
-        style="background: rgba(0,0,0,0.65); backdrop-filter: blur(6px)"
+        style="background: rgba(0,0,0,0.65);"
         @click.self="$emit('update:modelValue', false)"
       >
         <Transition name="modal">

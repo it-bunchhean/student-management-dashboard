@@ -76,8 +76,6 @@ export const NAV_ITEMS: NavSection[] = [
     section: 'MANAGEMENT',
     items: [
       { label: 'Attendance', icon: 'calendar-check', to: '/attendance', roles: [ROLE.ADMIN, ROLE.STAFF] },
-      // { label: 'Grades',     icon: 'award',          to: '/grades',     roles: [ROLE.ADMIN, ROLE.STAFF] },
-      // { label: 'Payments',   icon: 'credit-card',    to: '/payments',   roles: [ROLE.ADMIN, ROLE.STAFF] },
       { label: 'Schedule',   icon: 'clock',          to: '/schedule',   roles: [ROLE.ADMIN, ROLE.STAFF] },
     ],
   },
@@ -96,8 +94,6 @@ export const NAV_ITEMS: NavSection[] = [
         to: '/admin',
         roles: [ROLE.ADMIN],
         children: [
-          { label: 'Roles', to: '/admin/roles' },
-          { label: 'Permissions', to: '/admin/permissions' },
           { label: 'Audit Logs', icon: 'activity', to: '/admin/audit' },
         ],
       },
@@ -141,15 +137,6 @@ export const ATTENDANCE_STATUSES = [
 export const GENDER_OPTIONS = [
   { label: 'Male', value: 'male' },
   { label: 'Female', value: 'female' },
-  { label: 'Other', value: 'other' },
-]
-
-export const PAYMENT_TYPES = [
-  { label: 'Tuition', value: 'tuition' },
-  { label: 'Registration', value: 'registration' },
-  { label: 'Exam Fee', value: 'exam' },
-  { label: 'Library', value: 'library' },
-  { label: 'Hostel', value: 'hostel' },
   { label: 'Other', value: 'other' },
 ]
 

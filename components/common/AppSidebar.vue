@@ -1,6 +1,6 @@
 <template>
     <aside
-        class="sidebar h-full flex flex-col transition-all duration-300 ease-in-out"
+        class="sidebar h-full flex flex-col transition-[width] duration-300 ease-in-out"
         :class="collapsed ? 'w-[70px]' : 'w-70'"
     >
         <!-- Logo Header -->
@@ -317,5 +317,31 @@ const toggleColorMode = () => {
 .expand-leave-to {
     max-height: 0;
     opacity: 0;
+}
+
+.dropdonw {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition: 
+        grid-template-rows 0.25s ease,
+        opacity 0.2s ease,
+        visibility 0s;
+}
+
+.dropdown--open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transition:
+        grid-template-rows 0.25s ease,
+        opacity 0.2s ease,
+        visibility 0s;
+}
+
+.dropdown-inner {
+    overflow: hidden;
+    min-height: 0; 
 }
 </style>

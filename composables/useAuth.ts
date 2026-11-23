@@ -4,40 +4,40 @@ export const useAuth = () => {
 
   const login = async (credentials: { email: string; password: string;}) => {
     // Login disabled
-    /*
+    
     const success = await authStore.login(credentials)
     if (success) {
       await router.push('/dashboard')
     }
     return success
-    */
+    
     await router.push('/dashboard')
     return true
   }
 
   const logout = async () => {
     // Logout disabled
-    /*
+    
     await authStore.logout()
     await router.push('/auth/login')
-    */
+    
     await router.push('/dashboard')
   }
 
   const requireAuth = () => {
     // Auth requirement disabled
-    /*
+    
     if (!authStore.isAuthenticated) {
       router.push('/auth/login')
       return false 
     }
-    */
+    
     return true
   }
 
   const requireRole = (role: string) => {
     // Role requirement disabled
-    /*
+    
     if (!authStore.isAuthenticated) {
       router.push('/auth/login')
       return false
@@ -46,7 +46,7 @@ export const useAuth = () => {
       router.push('/dashboard')
       return false
     }
-    */
+    
     return true
   }
 

@@ -1,55 +1,39 @@
-import { defineStore } from "pinia";
-import { authService } from "~/services/auth.service";
+import { defineStore } from 'pinia'
+import { authService } from '~/services/auth.service'
 
-import type {
-  AuthUser,
-  LoginCredentials,
-  RegisterData,
-} from "~/types";
+import type { AuthUser, LoginCredentials, RegisterData } from '~/types'
 
 interface AuthState {
-  user: AuthUser | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
+  user: AuthUser | null
+  isAuthenticated: boolean
+  loading: boolean
+  error: string | null
 }
 
-// Mock user for bypass when login and register are disabled
-const mockUser: AuthUser = {
-  id: "1",
-  fullName: "Admin User",
-  email: "admin@eduadmin.edu",
-  verified: true,
-  verificationToken: "mock-token",
-  refreshToken: "mock-refresh-token",
-  status: true,
-  role: "ROLE_ADMIN",
-  attempt: 0,
-  lockTime: "",
-};
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = error.message
+    if (typeof message === 'string' && message.length > 0) return message
+  }
+  return fallback
+}
 
-export const useAuthStore = defineStore("auth", {
+export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
-    // Auth disabled: default to mock user and authenticated
-    user: mockUser,
-    isAuthenticated: true,
-    // Original state:
-    // user: null,
-    // isAuthenticated: false,
+    user: null,
+    isAuthenticated: false,
     loading: false,
     error: null,
   }),
 
   getters: {
-    role: (state): string => state.user?.role ?? "",
-
-    isAdmin: (state): boolean => state.user?.role === "ROLE_ADMIN",
-
-    isStaff: (state): boolean => ["ROLE_ADMIN", "ROLE_STAFF"].includes(state.user?.role ?? "",),
-
-    userName: (state): string => state.user?.fullName ?? "Guest",
-
-    userEmail: (state): string => state.user?.email ?? "",
+    role: (state): string => state.user?.role ?? '',
+    isAdmin: (state): boolean => state.user?.role === 'ROLE_ADMIN',
+    isStaff: (state): boolean => ['ROLE_ADMIN', 'ROLE_STAFF'].includes(state.user?.role ?? ''),
+    isTeacher: (state): boolean => state.user?.role === 'ROLE_TEACHER',
+    userName: (state): string => state.user?.fullName ?? 'Guest',
+    userEmail: (state): string => state.user?.email ?? '',
   },
 
   actions: {
@@ -58,115 +42,91 @@ export const useAuthStore = defineStore("auth", {
     },
 
     hasAnyRole(roles: string[]): boolean {
-      return roles.includes(this.user?.role ?? "")
+      return roles.includes(this.user?.role ?? '')
     },
 
-    async signin(credentials: LoginCredentials) {
-      this.loading = true;
-      this.error = null;
+    async signin(credentials: LoginCredentials): Promise<boolean> {
+      this.loading = true
+      this.error = null
 
-      // Signin disabled:
-      /*
       try {
-        await authService.signin(credentials)
-        await this.fetchProfile()
+        const response = await authService.signin(credentials)
+        this.user = response.data
         this.isAuthenticated = true
-
-        return true;
-      } catch (err: any) {
-        this.error = err.message ?? "Login failed"
+        return true
+      } catch (error: unknown) {
+        this.user = null
+        this.isAuthenticated = false
+        this.error = getErrorMessage(error, 'Login failed')
         return false
       } finally {
         this.loading = false
       }
-      */
-
-      this.isAuthenticated = true;
-      this.loading = false;
-      return true;
     },
 
-    async register(data: RegisterData) {
-      this.loading = true;
-      this.error = null;
+    async register(data: RegisterData): Promise<boolean> {
+      this.loading = true
+      this.error = null
 
-      // Register disabled:
-      /*
       try {
         await authService.signup(data)
-
-        return true;
-      } catch (err: any) {
-        this.error = err.message ?? "Registration failed"
-
+        return true
+      } catch (error: unknown) {
+        this.error = getErrorMessage(error, 'Registration failed')
         return false
       } finally {
         this.loading = false
       }
-      */
-
-      this.loading = false;
-      return true;
     },
 
-    async fetchProfile() {
-      // Profile fetching disabled
-      /*
+    async fetchProfile(): Promise<boolean> {
       try {
-        const response = await authService.profile();
-
-        this.user = response.data;
-        this.isAuthenticated = true;
-      } catch (error: any) {
-        console.error("Error fetching profile:", error.message);
-        
-        this.user = null;
-        this.isAuthenticated = false;
+        const response = await authService.profile()
+        this.user = response.data
+        this.isAuthenticated = true
+        return true
+      } catch {
+        this.user = null
+        this.isAuthenticated = false
+        return false
       }
-      */
     },
 
-    async checkAuth() {
-      // checkAuth disabled
-      /*
+    async checkAuth(): Promise<boolean> {
       try {
         const response = await authService.isAuthenticated()
-        if (response.data) {
-          await this.fetchProfile();
-        } else {
-          this.user = null;
+        if (!response.data) {
+          this.user = null
+          this.isAuthenticated = false
+          return false
         }
-      } catch (error: any) {
-        console.error("Error checking authentication:", error.message);
-        this.user = null;
-        this.isAuthenticated = false;
+
+        return await this.fetchProfile()
+      } catch {
+        this.user = null
+        this.isAuthenticated = false
+        return false
       }
-      */
     },
 
-    async logout() {
-      this.loading = true;
+    async logout(): Promise<void> {
+      this.loading = true
 
-      // Logout disabled:
-      /*
       try {
-        await authService.logout();
-      } catch (error: any) {
-        console.error("Error logging out:", error.message);
+        await authService.logout()
+      } catch (error: unknown) {
+        this.error = getErrorMessage(error, 'Logout failed')
       } finally {
-        this.user = null;
-        this.isAuthenticated = false;
-        this.loading = false;
-
-        await navigateTo("/auth/login");
+        this.user = null
+        this.isAuthenticated = false
+        this.loading = false
       }
-      */
-      this.loading = false;
-      await navigateTo("/dashboard");
+
+      await navigateTo('/auth/login')
     },
 
-    clearError() {
-      this.error = null;
+    clearError(): void {
+      this.error = null
     },
   },
-});
+})

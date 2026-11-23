@@ -1,5 +1,5 @@
 <template>
-  <nav class="flex items-center gap-1.5 text-sm min-w-0" aria-label="Breadcrumb">
+  <nav class="flex mt-2 items-center gap-1.5 text-sm min-w-0" aria-label="Breadcrumb">
     <template v-for="(crumb, i) in breadcrumbs" :key="crumb.path">
       <svg v-if="i > 0" class="w-3.5 h-3.5 shrink-0" style="color: var(--text-muted)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
