@@ -1,11 +1,13 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import type { ApiResponse, PaginatedResponse, ApiError } from '~/types'
 
+const apiUrl = import.meta.env.NUXT_PUBLIC_API_BASE_URL;
+
 // Axios Instance
 class ApiService {
   private instance: AxiosInstance
   private refreshing = false
-  private BASE_URL = "http://localhost:8080/api/v1"
+  private BASE_URL = `${apiUrl}`;
 
   constructor() {
     this.instance = axios.create({
@@ -52,8 +54,7 @@ class ApiService {
             } catch {
               this.refreshing = false
               this.clearTokens()
-              // Redirect to login disabled
-              // window.location.href = '/auth/login'
+              window.location.href = '/auth/login'
               return Promise.reject(error)
             }
           }

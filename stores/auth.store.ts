@@ -28,10 +28,9 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    role: (state): string => state.user?.role ?? '',
+    // role: (state): string => state.user?.role ? '',
     isAdmin: (state): boolean => state.user?.role === 'ROLE_ADMIN',
-    isStaff: (state): boolean => ['ROLE_ADMIN', 'ROLE_STAFF'].includes(state.user?.role ?? ''),
-    isTeacher: (state): boolean => state.user?.role === 'ROLE_TEACHER',
+    // isStaff: (state): boolean => ['ROLE_ADMIN', 'ROLE_STAFF'].includes(state.user?.role ?? ''),
     userName: (state): string => state.user?.fullName ?? 'Guest',
     userEmail: (state): string => state.user?.email ?? '',
   },
@@ -41,9 +40,9 @@ export const useAuthStore = defineStore('auth', {
       return this.user?.role === role
     },
 
-    hasAnyRole(roles: string[]): boolean {
-      return roles.includes(this.user?.role ?? '')
-    },
+    // hasAnyRole(roles: string[]): boolean {
+    //   return roles.includes(this.user?.role ?? '')
+    // },
 
     async signin(credentials: LoginCredentials): Promise<boolean> {
       this.loading = true
