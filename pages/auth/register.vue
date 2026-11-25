@@ -2,22 +2,16 @@
   <div class="animate-fade-in">
     <div class="mb-8">
       <h2 class="font-display text-3xl font-bold" style="color: var(--text-primary)">Create account</h2>
-      <p class="mt-2 text-sm" style="color: var(--text-secondary)">Join EduAdmin Pro to manage your institution</p>
+      <p class="mt-2 text-sm" style="color: var(--text-secondary)">Join student system to manage your institution</p>
     </div>
 
     <form class="space-y-4" @submit.prevent="handleRegister">
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 gap-3">
         <div class="space-y-1.5">
-          <label class="text-xs font-semibold" style="color: var(--text-secondary)">First Name</label>
-          <input v-model="form.firstName" type="text" placeholder="John" class="input-field"
-            :class="errors.firstName ? 'error' : ''" />
-          <p v-if="errors.firstName" class="text-xs text-red-400">{{ errors.firstName }}</p>
-        </div>
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold" style="color: var(--text-secondary)">Last Name</label>
-          <input v-model="form.lastName" type="text" placeholder="Doe" class="input-field"
-            :class="errors.lastName ? 'error' : ''" />
-          <p v-if="errors.lastName" class="text-xs text-red-400">{{ errors.lastName }}</p>
+          <label class="text-xs font-semibold" style="color: var(--text-secondary)">Username</label>
+          <input v-model="form.username" type="text" placeholder="@username" class="input-field"
+            :class="errors.username ? 'error' : ''" />
+          <p v-if="errors.username" class="text-xs text-red-400">{{ errors.username }}</p>
         </div>
       </div>
 
@@ -33,21 +27,6 @@
             :class="errors.email ? 'error' : ''" />
         </div>
         <p v-if="errors.email" class="text-xs text-red-400">{{ errors.email }}</p>
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-xs font-semibold" style="color: var(--text-secondary)">Role</label>
-        <div class="flex flex-wrap gap-4 mt-2">
-          <div
-            v-for="r in [{ v: 'ROLE_ADMIN', l: 'Admin' }, { v: 'ROLE_TEACHER', l: 'Teacher' }, { v: 'ROLE_STAFF', l: 'Staff' }]"
-            :key="r.v" class="flex items-center gap-2">
-            <input v-model="form.role" type="radio" :id="`role-${r.v}`" :value="r.v" name="role" class="radio-custom" />
-            <label :for="`role-${r.v}`" class="text-sm cursor-pointer" style="color: var(--text-primary)">
-              {{ r.l }}
-            </label>
-          </div>
-        </div>
-        <p v-if="errors.role" class="text-xs text-red-400">{{ errors.role }}</p>
       </div>
 
       <div class="space-y-1.5">
@@ -70,8 +49,7 @@
         </div>
         <!-- Password strength -->
         <div class="flex gap-1 mt-1.5">
-          <div v-for="i in 4" :key="i" class="h-1 flex-1 rounded-full transition-colors duration-300"
-            :class="passwordStrength >= i ? strengthColor : 'bg-[var(--surface-hover)]'" />
+          <div v-for="i in 4" :key="i" class="h-1 flex-1 rounded-full transition-colors duration-300"/>
         </div>
         <p v-if="errors.password" class="text-xs text-red-400">{{ errors.password }}</p>
       </div>
@@ -117,16 +95,13 @@ import { useAuthStore } from '~/stores/auth.store'
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Create Account' })
 
-// Register disabled: redirect directly to dashboard
-await navigateTo('/dashboard')
-
 const router = useRouter()
 const toast = useToast()
 const authStore = useAuthStore()
 const loading = ref(false)
 const showPass = ref(false)
 
-const form = reactive({ firstName: '', lastName: '', email: '', role: 'ROLE_TEACHER', password: '', confirmPassword: '', agree: false })
+const form = reactive({ username: '', email: '', role: 'ROLE_USER', password: '', confirmPassword: '', agree: false })
 const errors = ref<Record<string, string>>({})
 
 const passwordStrength = computed(() => {
@@ -139,21 +114,10 @@ const passwordStrength = computed(() => {
   return s
 })
 
-const strengthColor = computed(() => {
-  if (passwordStrength.value <= 1) return 'bg-red-500'
-  if (passwordStrength.value <= 2) return 'bg-amber-500'
-  if (passwordStrength.value <= 3) return 'bg-primary-500'
-  return 'bg-emerald-500'
-})
-
-// Registration logic disabled
-/*
 const handleRegister = async () => {
   errors.value = validateForm(form as unknown as Record<string, unknown>, {
-    firstName: [v => isRequired(v, 'First name')],
-    lastName: [v => isRequired(v, 'Last name')],
+    username: [v => isRequired(v, 'Username')],
     email: [v => isRequired(v, 'Email'), v => isEmail(v as string)],
-    role: [v => isRequired(v, 'Role')],
     password: [v => isRequired(v, 'Password'), v => isMinLength(8)(v as string)],
     confirmPassword: [v => isMatch(form.password)(v as string)],
     agree: [v => v ? undefined : 'You must agree to the terms'],
@@ -163,14 +127,14 @@ const handleRegister = async () => {
   loading.value = true
   try {
     const success = await authStore.register({
-      fullName: `${form.firstName} ${form.lastName}`.trim(),
+      username: form.username,
       email: form.email,
       password: form.password,
-      role: form.role as any // Backend expects string in user's example, although RegisterData type says string[]
+      role: form.role as any 
     })
 
     if (success) {
-      toast.success('Account created!', 'Welcome to EduAdmin Pro. You can now sign in.')
+      toast.success('Account created!', 'Welcome to student management system. You can now sign in.')
       router.push('/users')
     } else {
       toast.error('Registration failed', authStore.error || 'Could not create account.')
@@ -182,9 +146,5 @@ const handleRegister = async () => {
     loading.value = false
   }
 }
-*/
 
-const handleRegister = async () => {
-  await navigateTo('/dashboard')
-}
 </script>

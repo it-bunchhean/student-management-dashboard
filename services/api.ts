@@ -1,7 +1,8 @@
+
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import type { ApiResponse, PaginatedResponse, ApiError } from '~/types'
 
-const apiUrl = import.meta.env.NUXT_PUBLIC_API_BASE_URL;
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 // Axios Instance
 class ApiService {
@@ -195,3 +196,4 @@ export function createCrudService<T, CreateDTO = Partial<T>, UpdateDTO = Partial
     },
   }
 }
+

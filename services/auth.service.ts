@@ -6,11 +6,11 @@ import type { ApiResponse, AuthUser, AuthTokens, LoginCredentials, RegisterData,
 export const authService = {
   async signin(credentials: LoginCredentials): Promise<ApiResponse<AuthUser>> {
     const response = await api.post<ApiResponse<AuthUser>>(
-      '/auth/signin',
+      '/auth/login',
       credentials
     )
     const {data} = response;
-    api.setTokens(data.verificationToken, data.refreshToken);
+    // api.setTokens(data.verificationToken, data.refreshToken);
     return response;
   },
 

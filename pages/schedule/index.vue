@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <div
-      class="flex flex-wrap items-center justify-between gap-4 page-header pb-4 border-b border-[var(--surface-border)]">
+      class="flex flex-wrap items-center justify-between gap-4 page-header pb-4 ">
       <div>
         <h2 class="text-3xl" style="color: var(--text-primary)">Schedule</h2>
         <p class="text-[var(--text-muted)] text-sm">Dynamic timetable management across all sessions.</p>

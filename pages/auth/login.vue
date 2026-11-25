@@ -138,7 +138,7 @@ const handleLogin = async () => {
     ? redirect
     : authStore.isAdmin || authStore.isStaff
       ? '/dashboard'
-      : authStore.user?.role === 'ROLE_TEACHER'
+      : authStore.user?.role === 'ROLE_USER'
         ? '/teachers'
         : '/'
 

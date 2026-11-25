@@ -28,9 +28,9 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    // role: (state): string => state.user?.role ? '',
+    role: (state): string => state.user?.role ?? '',
     isAdmin: (state): boolean => state.user?.role === 'ROLE_ADMIN',
-    // isStaff: (state): boolean => ['ROLE_ADMIN', 'ROLE_STAFF'].includes(state.user?.role ?? ''),
+    isStaff: (state): boolean => ['ROLE_ADMIN', 'ROLE_STAFF'].includes(state.user?.role ?? ''),
     userName: (state): string => state.user?.fullName ?? 'Guest',
     userEmail: (state): string => state.user?.email ?? '',
   },
@@ -40,9 +40,9 @@ export const useAuthStore = defineStore('auth', {
       return this.user?.role === role
     },
 
-    // hasAnyRole(roles: string[]): boolean {
-    //   return roles.includes(this.user?.role ?? '')
-    // },
+     hasAnyRole(roles: string[]): boolean {
+       return roles.includes(this.user?.role ?? '')
+     },
 
     async signin(credentials: LoginCredentials): Promise<boolean> {
       this.loading = true
@@ -50,6 +50,12 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         const response = await authService.signin(credentials)
+        if (!response.success) {
+          this.user = null
+          this.isAuthenticated = false
+          this.error = response.message || 'Login failed'
+          return false
+        }
         this.user = response.data
         this.isAuthenticated = true
         return true
@@ -68,7 +74,11 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
 
       try {
-        await authService.signup(data)
+        const response = await authService.signup(data)
+        if (!response.success) {
+          this.error = response.message || 'Registration failed'
+          return false
+        }
         return true
       } catch (error: unknown) {
         this.error = getErrorMessage(error, 'Registration failed')
