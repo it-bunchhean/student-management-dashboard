@@ -246,6 +246,7 @@ export interface Activity {
 
 // auth types 
 export interface AuthUser {
+  accessToken: any
   id: string
   fullName: string
   email: string
@@ -275,7 +276,6 @@ export interface Role {
   name: string
   status: 'ACTIVE' | 'INACTIVE' | boolean
   description: string
-  permissions?: Permission[] | string[]
   users?: User[] | string[]
 }
 
@@ -295,16 +295,18 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  fullName: string
+  username: string
   email: string
   password: string
   role?: string[]
 }
 
 export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
-  expiresIn: number
+  username: string;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
 }
 
 // API Response types 

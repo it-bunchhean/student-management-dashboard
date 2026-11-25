@@ -21,6 +21,7 @@
             type="email"
             placeholder="admin@eduadmin.edu"
             autocomplete="email"
+            required
             class="input-field pl-10"
             :class="errors.email ? 'error' : ''"
           />
@@ -46,6 +47,7 @@
             :type="showPassword ? 'text' : 'password'"
             placeholder="••••••••"
             autocomplete="current-password"
+            required
             class="input-field pl-10 pr-10"
             :class="errors.password ? 'error' : ''"
           />
@@ -109,43 +111,96 @@ const toast = useToast()
 const route = useRoute()
 
 const showPassword = ref(false)
-const form = reactive({ email: '', password: '' })
+
+const form = reactive({
+  email: '',
+  password: '',
+})
+
 const errors = ref<Record<string, string>>({})
+
 const authLoading = computed(() => authStore.loading)
 const authError = computed(() => authStore.error)
 
-const handleLogin = async () => {
-  authStore.clearError();
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const validateForm = (): boolean => {
   errors.value = {}
-  if (!form.email.trim()) errors.value.email = 'Email is required.'
-  if (!form.password) errors.value.password = 'Password is required.'
-  if (Object.keys(errors.value).length > 0) return
 
-  const signedIn = await authStore.signin({
-    email: form.email.trim(),
-    password: form.password,
-  })
+  const email = form.email.trim()
 
-  if (!signedIn) {
-    toast.error(authStore.error || 'Email or password is incorrect.')
-    return
+  if (!email) {
+    errors.value.email = 'Email is required.'
+  } else if (!emailRegex.test(email)) {
+    errors.value.email = 'Please enter a valid email address.'
   }
 
-  toast.success('Logged in successfully.')
-  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
-  const destination = redirect.startsWith('/') && !redirect.startsWith('//')
-    ? redirect
-    : authStore.isAdmin || authStore.isStaff
-      ? '/dashboard'
-      : authStore.user?.role === 'ROLE_USER'
-        ? '/teachers'
-        : '/'
+  if (!form.password) {
+    errors.value.password = 'Password is required.'
+  }
 
-  await navigateTo(destination)
+  return Object.keys(errors.value).length === 0
 }
 
-// Clear errors on input
-watch(() => form.email, () => { delete errors.value.email; authStore.clearError() })
-watch(() => form.password, () => { delete errors.value.password; authStore.clearError() })
+const getRedirectDestination = (): string => {
+  const redirect = route.query.redirect
+
+  if (
+    typeof redirect === 'string' &&
+    redirect.startsWith('/') &&
+    !redirect.startsWith('//') &&
+    !redirect.includes('\\')
+  ) {
+    return redirect
+  }
+
+  if (authStore.isAdmin || authStore.isStaff) {
+    return '/dashboard'
+  }
+
+  // Both supported account roles enter the application dashboard; the
+  // dashboard and navigation use the loaded role to show the right features.
+  if (authStore.role === 'ROLE_USER') return '/dashboard'
+
+  return '/dashboard'
+}
+
+const handleLogin = async () => {
+  if (authLoading.value) return
+
+  authStore.clearError()
+
+  if (!validateForm()) return
+
+  try {
+    const signedIn = await authStore.signin({
+      email: form.email.trim(),
+      password: form.password,
+    })
+
+    if (!signedIn) {
+    toast.error(authStore.error || 'Invalid email or password.')
+      return
+    }
+
+    toast.success('Logged in successfully.')
+
+    await navigateTo(getRedirectDestination())
+
+  } catch (error) {
+    console.error('Login failed:', error)
+    toast.error(authStore.error || 'Something went wrong. Please try again.')
+  }
+}
+
+// Clear validation errors when users modify inputs.
+watch(() => form.email, () => {
+  delete errors.value.email
+  authStore.clearError()
+})
+
+watch(() => form.password, () => {
+  delete errors.value.password
+  authStore.clearError()
+})
 </script>

@@ -9,7 +9,7 @@
       <div class="grid grid-cols-1 gap-3">
         <div class="space-y-1.5">
           <label class="text-xs font-semibold" style="color: var(--text-secondary)">Username</label>
-          <input v-model="form.username" type="text" placeholder="@username" class="input-field"
+          <input v-model.trim="form.username" type="text" placeholder="@username" autocomplete="username" required class="input-field"
             :class="errors.username ? 'error' : ''" />
           <p v-if="errors.username" class="text-xs text-red-400">{{ errors.username }}</p>
         </div>
@@ -23,7 +23,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          <input v-model="form.email" type="email" placeholder="you@institution.edu" class="input-field pl-10"
+          <input v-model.trim="form.email" type="email" placeholder="you@institution.edu" autocomplete="email" required class="input-field pl-10"
             :class="errors.email ? 'error' : ''" />
         </div>
         <p v-if="errors.email" class="text-xs text-red-400">{{ errors.email }}</p>
@@ -38,7 +38,7 @@
               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
           <input v-model="form.password" :type="showPass ? 'text' : 'password'" placeholder="Min. 8 characters"
-            class="input-field pl-10 pr-10" :class="errors.password ? 'error' : ''" />
+            autocomplete="new-password" required minlength="8" class="input-field pl-10 pr-10" :class="errors.password ? 'error' : ''" />
           <button type="button" class="absolute right-3.5 top-1/2 -translate-y-1/2" style="color: var(--text-muted)"
             @click="showPass = !showPass">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,8 @@
         </div>
         <!-- Password strength -->
         <div class="flex gap-1 mt-1.5">
-          <div v-for="i in 4" :key="i" class="h-1 flex-1 rounded-full transition-colors duration-300"/>
+          <div v-for="i in 4" :key="i" class="h-1 flex-1 rounded-full transition-colors duration-300"
+            :style="{ backgroundColor: i <= passwordStrength ? (passwordStrength < 2 ? '#ef4444' : passwordStrength < 4 ? '#f59e0b' : '#22c55e') : 'var(--border-color)' }" />
         </div>
         <p v-if="errors.password" class="text-xs text-red-400">{{ errors.password }}</p>
       </div>
@@ -57,7 +58,7 @@
       <div class="space-y-1.5">
         <label class="text-xs font-semibold" style="color: var(--text-secondary)">Confirm Password</label>
         <input v-model="form.confirmPassword" :type="showPass ? 'text' : 'password'" placeholder="••••••••"
-          class="input-field" :class="errors.confirmPassword ? 'error' : ''" />
+          autocomplete="new-password" required class="input-field" :class="errors.confirmPassword ? 'error' : ''" />
         <p v-if="errors.confirmPassword" class="text-xs text-red-400">{{ errors.confirmPassword }}</p>
       </div>
 
@@ -95,23 +96,18 @@ import { useAuthStore } from '~/stores/auth.store'
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Create Account' })
 
-const router = useRouter()
 const toast = useToast()
 const authStore = useAuthStore()
 const loading = ref(false)
 const showPass = ref(false)
 
-const form = reactive({ username: '', email: '', role: 'ROLE_USER', password: '', confirmPassword: '', agree: false })
+const form = reactive({ username: '', email: '', password: '', confirmPassword: '', agree: false })
 const errors = ref<Record<string, string>>({})
 
 const passwordStrength = computed(() => {
   const p = form.password
-  let s = 0
-  if (p.length >= 8) s++
-  if (/[A-Z]/.test(p)) s++
-  if (/[0-9]/.test(p)) s++
-  if (/[^A-Za-z0-9]/.test(p)) s++
-  return s
+  if (!p) return 0
+  return [p.length >= 8, /[A-Z]/.test(p), /[0-9]/.test(p), /[^A-Za-z0-9]/.test(p)].filter(Boolean).length
 })
 
 const handleRegister = async () => {
@@ -122,26 +118,26 @@ const handleRegister = async () => {
     confirmPassword: [v => isMatch(form.password)(v as string)],
     agree: [v => v ? undefined : 'You must agree to the terms'],
   })
-  if (hasErrors(errors.value)) return
+  if (hasErrors(errors.value) || loading.value) return
 
   loading.value = true
   try {
     const success = await authStore.register({
-      username: form.username,
-      email: form.email,
+      username: form.username.trim(),
+      email: form.email.trim().toLowerCase(),
       password: form.password,
-      role: form.role as any 
     })
 
     if (success) {
-      toast.success('Account created!', 'Welcome to student management system. You can now sign in.')
-      router.push('/users')
+      toast.success('Registration successful', 'Your account has been created. Redirecting you to sign in…')
+      await navigateTo('/auth/login', { replace: true })
     } else {
       toast.error('Registration failed', authStore.error || 'Could not create account.')
     }
+
   } catch (err: any) {
     console.error('Registration error:', err)
-    toast.error('Registration error', 'An unexpected error occurred.')
+    toast.error('Registration error', authStore.error || 'An unexpected error occurred.')
   } finally {
     loading.value = false
   }

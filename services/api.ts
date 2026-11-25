@@ -2,7 +2,10 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import type { ApiResponse, PaginatedResponse, ApiError } from '~/types'
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
+const apiUrl = import.meta.env.VITE_API_BASE_URL
+  || process.env.NUXT_PUBLIC_API_BASE_URL
+  || process.env.VITE_API_BASE_URL
+  || 'http://localhost:8080/api/v1'
 
 // Axios Instance
 class ApiService {
@@ -42,8 +45,10 @@ class ApiService {
       (response) => response,
       async (error) => {
         const originalRequest = error.config
+        const requestPath = originalRequest?.url ?? ''
+        const isAuthRequest = /^\/?auth\/(login|signup|register)(\?|$)/.test(requestPath)
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !isAuthRequest && originalRequest && !originalRequest._retry) {
           originalRequest._retry = true
 
           if (!this.refreshing) {
@@ -94,10 +99,18 @@ class ApiService {
 
   private normalizeError(error: unknown): ApiError {
     if (axios.isAxiosError(error)) {
+      const responseData = error.response?.data
+      const serverMessage = typeof responseData?.message === 'string'
+        ? responseData.message
+        : typeof responseData?.error === 'string'
+          ? responseData.error
+          : typeof responseData?.detail === 'string'
+            ? responseData.detail
+            : undefined
       return {
-        message: error.response?.data?.message ?? error.message ?? 'An error occurred',
-        code: error.response?.data?.code,
-        errors: error.response?.data?.errors,
+        message: serverMessage ?? error.message ?? 'An error occurred',
+        code: responseData?.code,
+        errors: responseData?.errors,
         status: error.response?.status,
       }
     }

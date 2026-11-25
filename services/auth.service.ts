@@ -4,14 +4,28 @@ import type { ApiResponse, AuthUser, AuthTokens, LoginCredentials, RegisterData,
 
 // Auth Service
 export const authService = {
-  async signin(credentials: LoginCredentials): Promise<ApiResponse<AuthUser>> {
-    const response = await api.post<ApiResponse<AuthUser>>(
+
+  async signin(credentials: LoginCredentials): Promise<ApiResponse<AuthTokens>> {
+    const response = await api.post<ApiResponse<AuthTokens> | AuthTokens>(
       '/auth/login',
       credentials
     )
-    const {data} = response;
-    // api.setTokens(data.verificationToken, data.refreshToken);
-    return response;
+
+    // Backends commonly return either { data: { accessToken, refreshToken } }
+    // or the token object directly. Accept both response shapes.
+    const body = response as ApiResponse<AuthTokens> & Partial<AuthTokens>
+    const data = (body.data ?? body) as AuthTokens & Record<string, unknown>
+    const accessToken = data.accessToken ?? data.access_token
+    const refreshToken = data.refreshToken ?? data.refresh_token
+
+    if (typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
+      throw new Error('Invalid authentication response from server')
+    }
+
+    const normalized = { ...data, accessToken, refreshToken }
+    api.setTokens(accessToken, refreshToken)
+
+    return { ...(body as ApiResponse<AuthTokens>), data: normalized }
   },
 
   async signup(data: RegisterData): Promise<ApiResponse<AuthUser>> {
