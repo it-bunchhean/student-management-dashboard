@@ -1,17 +1,19 @@
-
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import type { ApiResponse, PaginatedResponse, ApiError } from '~/types'
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL
-  || process.env.NUXT_PUBLIC_API_BASE_URL
-  || process.env.VITE_API_BASE_URL
+const apiUrl =
+  import.meta.env.VITE_API_BASE_URL
+  || (typeof process !== 'undefined' ? process.env?.NUXT_PUBLIC_API_BASE_URL : undefined)
+  || (typeof process !== 'undefined' ? process.env?.VITE_API_BASE_URL : undefined)
   || 'http://localhost:8080/api/v1'
 
-// Axios Instance
+const ACCESS_KEY = 'access_token'
+const REFRESH_KEY = 'refresh_token'
+
 class ApiService {
   private instance: AxiosInstance
-  private refreshing = false
-  private BASE_URL = `${apiUrl}`;
+  private refreshPromise: Promise<void> | null = null
+  private BASE_URL = `${apiUrl}`
 
   constructor() {
     this.instance = axios.create({
@@ -21,14 +23,13 @@ class ApiService {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      withCredentials: true
+      withCredentials: true,
     })
 
     this.setupInterceptors()
   }
 
   private setupInterceptors(): void {
-    // Request interceptor — attach JWT token
     this.instance.interceptors.request.use(
       (config) => {
         const token = this.getToken()
@@ -37,64 +38,89 @@ class ApiService {
         }
         return config
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     )
 
-    // Response interceptor — handle errors
+    // Response interceptor — refresh on 401, retry once
     this.instance.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config
         const requestPath = originalRequest?.url ?? ''
-        const isAuthRequest = /^\/?auth\/(login|signup|register)(\?|$)/.test(requestPath)
+        const isAuthRequest = /^\/?auth\/(login|signin|signup|register|refresh)(\?|$)/.test(requestPath)
 
-        if (error.response?.status === 401 && !isAuthRequest && originalRequest && !originalRequest._retry) {
+        if (
+          error.response?.status === 401 &&
+          !isAuthRequest &&
+          originalRequest &&
+          !originalRequest._retry
+        ) {
           originalRequest._retry = true
 
-          if (!this.refreshing) {
-            this.refreshing = true
-            try {
-              await this.refreshToken()
-              this.refreshing = false
-              return this.instance(originalRequest)
-            } catch {
-              this.refreshing = false
-              this.clearTokens()
+          try {
+            // all parallel 401s share ONE refresh call and wait for it
+            await this.refreshToken()
+            return this.instance(originalRequest)
+          } catch {
+            // refresh token expired/invalid -> user must login again
+            this.clearTokens()
+
+            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth/')) {
               window.location.href = '/auth/login'
-              return Promise.reject(error)
             }
+            return Promise.reject(this.normalizeError(error))
           }
         }
 
         return Promise.reject(this.normalizeError(error))
-      }
+      },
     )
   }
 
-  private getToken(): string | null {
+  getToken(): string | null {
     if (typeof window === 'undefined') return null
-    return localStorage.getItem('access_token')
+    return localStorage.getItem(ACCESS_KEY)
   }
 
-  private getRefreshToken(): string | null {
+  getRefreshToken(): string | null {
     if (typeof window === 'undefined') return null
-    return localStorage.getItem('refresh_token')
+    return localStorage.getItem(REFRESH_KEY)
   }
 
-  private clearTokens(): void {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+  hasTokens(): boolean {
+    return !!(this.getToken() || this.getRefreshToken())
   }
 
-  private async refreshToken(): Promise<void> {
-    const refreshToken = this.getRefreshToken()
-    if (!refreshToken) throw new Error('No refresh token')
+  clearTokens(): void {
+    if (typeof window === 'undefined') return
+    localStorage.removeItem(ACCESS_KEY)
+    localStorage.removeItem(REFRESH_KEY)
+  }
 
-    const response = await this.instance.post<ApiResponse<{ accessToken: string }>>('/auth/refresh', {
-      refreshToken,
+  private refreshToken(): Promise<void> {
+    this.refreshPromise ??= (async () => {
+      const refreshToken = this.getRefreshToken()
+      if (!refreshToken) throw new Error('No refresh token')
+
+      const response = await axios.post(
+        `${this.BASE_URL}/auth/refresh`,
+        { refreshToken },
+        {
+          timeout: 15000,
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        },
+      )
+
+      const data = response.data?.data ?? response.data
+      if (!data?.accessToken) throw new Error('Invalid refresh response')
+
+      this.setTokens(data.accessToken, data.refreshToken ?? refreshToken)
+    })().finally(() => {
+      this.refreshPromise = null
     })
 
-    localStorage.setItem('access_token', response.data.data.accessToken)
+    return this.refreshPromise
   }
 
   private normalizeError(error: unknown): ApiError {
@@ -160,13 +186,14 @@ class ApiService {
     return response.data
   }
 
-  // Set auth tokens (called after login)
+  // Set auth tokens (called after login / refresh)
   setTokens(accessToken: string, refreshToken: string): void {
-    localStorage.setItem('access_token', accessToken)
-    localStorage.setItem('refresh_token', refreshToken)
+    if (typeof window === 'undefined') return
+    localStorage.setItem(ACCESS_KEY, accessToken)
+    localStorage.setItem(REFRESH_KEY, refreshToken)
   }
 
-  // Clear auth tokens (called after logout)
+  // Clear auth tokens (called after logout) — kept for backward compatibility
   removeTokens(): void {
     this.clearTokens()
   }
@@ -177,7 +204,7 @@ export const api = new ApiService()
 
 // Generic CRUD Builder
 export function createCrudService<T, CreateDTO = Partial<T>, UpdateDTO = Partial<T>>(
-  basePath: string
+  basePath: string,
 ) {
   return {
     async getAll(params?: Record<string, any>): Promise<PaginatedResponse<T>> {
@@ -209,4 +236,3 @@ export function createCrudService<T, CreateDTO = Partial<T>, UpdateDTO = Partial
     },
   }
 }
-

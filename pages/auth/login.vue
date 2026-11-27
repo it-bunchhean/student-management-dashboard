@@ -109,6 +109,7 @@ useHead({ title: 'Sign In' })
 const authStore = useAuthStore()
 const toast = useToast()
 const route = useRoute()
+const router = useRouter()
 
 const showPassword = ref(false)
 
@@ -145,6 +146,7 @@ const validateForm = (): boolean => {
 const getRedirectDestination = (): string => {
   const redirect = route.query.redirect
 
+  // Only allow in-app paths; reject protocol-relative and backslash paths.
   if (
     typeof redirect === 'string' &&
     redirect.startsWith('/') &&
@@ -153,14 +155,6 @@ const getRedirectDestination = (): string => {
   ) {
     return redirect
   }
-
-  if (authStore.isAdmin || authStore.isStaff) {
-    return '/dashboard'
-  }
-
-  // Both supported account roles enter the application dashboard; the
-  // dashboard and navigation use the loaded role to show the right features.
-  if (authStore.role === 'ROLE_USER') return '/dashboard'
 
   return '/dashboard'
 }
@@ -172,25 +166,26 @@ const handleLogin = async () => {
 
   if (!validateForm()) return
 
+  let signedIn = false
+
   try {
-    const signedIn = await authStore.signin({
+    signedIn = await authStore.signin({
       email: form.email.trim(),
       password: form.password,
     })
-
-    if (!signedIn) {
-    toast.error(authStore.error || 'Invalid email or password.')
-      return
-    }
-
-    toast.success('Logged in successfully.')
-
-    await navigateTo(getRedirectDestination())
-
   } catch (error) {
     console.error('Login failed:', error)
-    toast.error(authStore.error || 'Something went wrong. Please try again.')
+    toast.error('Login failed', authStore.error || 'Something went wrong. Please try again.')
+    return
   }
+
+  if (!signedIn) {
+    toast.error('Login failed', authStore.error || 'Invalid email or password.')
+    return
+  }
+
+  toast.success('Login successful', 'Redirecting to your dashboard…')
+  await router.replace(getRedirectDestination())
 }
 
 // Clear validation errors when users modify inputs.

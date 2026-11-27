@@ -1,52 +1,48 @@
+import type { LoginCredentials } from '~/types'
+
+const normalizeRole = (role: string): string => {
+  const value = role.trim().toUpperCase()
+  return value.startsWith('ROLE_') ? value : `ROLE_${value}`
+}
+
 export const useAuth = () => {
   const authStore = useAuthStore()
-  const router = useRouter()
 
-  const login = async (credentials: { email: string; password: string;}) => {
-    // Login disabled
-    
-    const success = await authStore.login(credentials)
+  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+    const success = await authStore.signin(credentials)
+
     if (success) {
-      await router.push('/dashboard')
+      await navigateTo('/dashboard')
     }
+
     return success
-    
-    await router.push('/dashboard')
-    return true
   }
 
-  const logout = async () => {
-    // Logout disabled
-    
+  const logout = async (): Promise<void> => {
     await authStore.logout()
-    await router.push('/auth/login')
-    
-    await router.push('/dashboard')
   }
 
-  const requireAuth = () => {
-    // Auth requirement disabled
-    
-    if (!authStore.isAuthenticated) {
-      router.push('/auth/login')
-      return false 
+  const requireAuth = async (): Promise<boolean> => {
+    const ok = await authStore.initialize()
+
+    if (!ok) {
+      await navigateTo('/auth/login')
+      return false
     }
-    
+
     return true
   }
 
-  const requireRole = (role: string) => {
-    // Role requirement disabled
-    
-    if (!authStore.isAuthenticated) {
-      router.push('/auth/login')
+  const requireRole = async (roles: string | string[]): Promise<boolean> => {
+    if (!(await requireAuth())) return false
+
+    const allowed = (Array.isArray(roles) ? roles : [roles]).map(normalizeRole)
+
+    if (!authStore.isAdmin && !authStore.hasAnyRole(allowed)) {
+      await navigateTo('/dashboard')
       return false
     }
-    if (authStore.user?.role !== role && authStore.user?.role !== 'admin') {
-      router.push('/dashboard')
-      return false
-    }
-    
+
     return true
   }
 
@@ -54,7 +50,8 @@ export const useAuth = () => {
     user: computed(() => authStore.user),
     isAuthenticated: computed(() => authStore.isAuthenticated),
     isAdmin: computed(() => authStore.isAdmin),
-    isTeacher: computed(() => authStore.isTeacher),
+    isStaff: computed(() => authStore.isStaff),
+    isTeacher: computed(() => authStore.hasRole('ROLE_TEACHER')),
     loading: computed(() => authStore.loading),
     error: computed(() => authStore.error),
     login,

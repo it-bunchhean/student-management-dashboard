@@ -31,8 +31,6 @@ export const mockDepartments: Department[] = [
 
 // ─── Mock Teachers ─────────────────────────────────────────────────────────
 const teacherNames = [
-  ['James', 'Wilson'], ['Sarah', 'Chen'], ['Michael', 'Brown'], ['Emily', 'Davis'],
-  ['Robert', 'Martinez'], ['Linda', 'Johnson'], ['David', 'Lee'], ['Jessica', 'Taylor'],
 ]
 
 export const mockTeachers: Teacher[] = teacherNames.map(([first, last], i) => ({

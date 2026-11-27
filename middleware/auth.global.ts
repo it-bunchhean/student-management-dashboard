@@ -1,4 +1,9 @@
 export default defineNuxtRouteMiddleware(async (to) => {
+  // The session tokens live in localStorage, which is only available in the
+  // browser. Defer protected-route checks until client hydration so SSR does
+  // not redirect authenticated users before their session can be restored.
+  if (import.meta.server) return
+
   const publicRoutes = [
     '/auth/login',
     '/auth/register',
